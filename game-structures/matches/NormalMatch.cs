@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic; 
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace game_structures
 {
+    [DataContract]
     public class NormalMatch : Match
     {
         private string[] possibleColors = new string[] { "blue", "green", "yellow", "red" };

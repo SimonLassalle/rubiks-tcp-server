@@ -61,9 +61,9 @@ namespace game_structures
                     LeaveRoom(fromId, data);
                     break;
                     
-                // case "getMatch":
-                //     GetMatch(fromId);
-                //     break;
+                case "getMatch":
+                    GetMatch(fromId, data);
+                    break;
                     
                 case "ready":
                     Ready(fromId);
@@ -189,9 +189,14 @@ namespace game_structures
                 RoomManager.GetInstance().JoinRoom(data[1], PlayerManager.GetInstance().GetPlayer(fromId));
                 Send(fromId, "join;;success;;" + data[1]);
             }
-            catch (Exception e)
+            catch (MyException e)
             {
                 Send(fromId, "join;;failed;;" + e.Message);
+            }
+            catch (Exception e)
+            {
+                Send(fromId, "join;;failed;;server error");
+                Console.WriteLine(e.Message + " -- " + e.StackTrace);
             }
         }
         
@@ -202,9 +207,50 @@ namespace game_structures
                 RoomManager.GetInstance().LeaveRoom(data[1], PlayerManager.GetInstance().GetPlayer(fromId));
                 Send(fromId, "leave;;success");
             }
+            catch (MyException e)
+            {
+                Send(fromId, "getMatch;;failed;;" + e.Message);
+            }
             catch (Exception e)
             {
-                Send(fromId, "leave;;failed;;" + e.Message);
+                Send(fromId, "leave;;failed;;server error");
+            }
+        }
+
+        public static void GetMatch(int fromId, string[] data)
+        {
+            try
+            {
+                // values
+                string roomName = data[1];
+                if (!RoomManager.GetInstance().TryGetRoom(roomName, out Room room))
+                {
+                    throw new MyException(string.Format("Room {0} not found", roomName));
+                }
+                Match match = room.GetMatch();
+                if (match == null)
+                {
+                    throw new MyException(string.Format("Room {0} has no match", roomName));
+                }
+                
+                // serialization
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(Match));
+                MemoryStream stream = new MemoryStream();
+                ser.WriteObject(stream, match);
+                stream.Position = 0;
+                StreamReader sr = new StreamReader(stream);
+                
+                string json = sr.ReadToEnd();
+                Send(fromId, "getMatch;;success;;" + json);
+            }
+            catch (MyException e)
+            {
+                Send(fromId, "getMatch;;failed;;" + e.Message);
+            }
+            catch (Exception e)
+            {
+                Send(fromId, "getMatch;;failed;;server error");
+                Console.WriteLine(e.Message + " -- " + e.StackTrace);
             }
         }
         

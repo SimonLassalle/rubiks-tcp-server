@@ -51,7 +51,9 @@ namespace game_structures
 
         public void CreateRoom(string roomName, int maxPlayers, Room.Privacy privacy=Room.Privacy.PUBLIC)
         {
-            rooms.Add(roomCount++, new Room(roomName, maxPlayers, privacy));
+            Room room = new Room(roomName, maxPlayers, privacy);
+            room.GenerateNewMatch<NormalMatch>(5, 5, (x, y) => new NormalMatch(x, y));
+            rooms.Add(roomCount++, room);
         }
 
         public void JoinRoom(string roomName, Player player)
@@ -61,7 +63,7 @@ namespace game_structures
                 room.AddPlayer(player);
                 return;
             }
-            throw new Exception(string.Format("Room {} does not exist", roomName));
+            throw new MyException(string.Format("Room {0} does not exist", roomName));
         }
 
         public void LeaveRoom(string roomName, Player player)
@@ -71,7 +73,7 @@ namespace game_structures
                 room.RemovePlayer(player);
                 return;
             }
-            throw new Exception(string.Format("Room {} does not exist", roomName));
+            throw new MyException(string.Format("Room {0} does not exist", roomName));
         }
     }
 }

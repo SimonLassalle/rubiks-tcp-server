@@ -38,7 +38,7 @@ namespace game_structures
 				if (p.id == id)
 					return p;
 			}
-			return null;
+			throw new MyException(string.Format("No player found with id {0}", id));
 		}
 		
 		// Finds the player which has the given name if any, or null
@@ -51,7 +51,7 @@ namespace game_structures
 					return player;
 				}
 			}
-			return null;
+			throw new MyException(string.Format("No player found with name {0}", name));
 		}
 		
 		// Creates a new player and adds it to the players list
